@@ -114,8 +114,12 @@ def compareDirectories():
             shutil.copy(fullName, secondDirectory)
             updateSyncFile(secondDirectory)
         else:
-            dirOneJson[file]
-        #file exists in d2, check date, if diff, then hash. if diff and date
+            dirOneDigest = dirOneJson[file][1]
+            dirTwoDigest = dirTwoJson[file][1]
+            if dirOneDigest == dirTwoDigest:
+                dirTwoJson[file]
+
+        #file exists in d2, check date, if diff the, then hash. if diff and date
 
 
 

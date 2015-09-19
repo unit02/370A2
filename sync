@@ -113,13 +113,17 @@ def compareDirectories():
         if file not in dirTwoJson:
             shutil.copy(fullName, secondDirectory)
             updateSyncFile(secondDirectory)
+        else:
+            dirOneJson[file]
+        #file exists in d2, check date, if diff, then hash. if diff and date
+
+
 
     for file in dirTwoJson:
         fullName = os.path.join(secondDirectory, file)
         if file not in dirOneJson:
             shutil.copy(fullName, firstDirectory)
             updateSyncFile(firstDirectory)
-
 
 def addMissingFilesFromDirectory(directoryOne,directoryTwo):
     pass
