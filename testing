@@ -1,0 +1,34 @@
+#!/user/bin/python
+
+import sys
+import os
+
+
+firstDirectory = sys.argv[1]
+secondDirectory = sys.argv[2]
+
+
+def checkInputDirectories():
+    #Neither of the inputs are directories
+    if not (os.path.isdir(firstDirectory)) and not ( os.path.isdir(secondDirectory)):
+        print("Those aren't directories!")
+
+    #The first directory is real, must create second one
+    elif (os.path.isdir(firstDirectory)) and not ( os.path.isdir(secondDirectory)):
+        createNewDirectory(secondDirectory)
+
+    #The second directory is real, must create first one
+    elif not (os.path.isdir(firstDirectory)) and ( os.path.isdir(secondDirectory)):
+        createNewDirectory(firstDirectory)
+
+    #Otherwise they are both directories yay!
+
+
+
+def createNewDirectory(directoryToMake):
+    os.makedirs(directoryToMake)
+
+
+if __name__ == "__main__":
+    checkInputDirectories()
+
