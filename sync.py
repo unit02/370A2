@@ -7,6 +7,7 @@ import json
 import time
 import hashlib
 from collections import defaultdict
+import datetime
 
 firstDirectory = sys.argv[1]
 secondDirectory = sys.argv[2]
@@ -109,20 +110,40 @@ def compareDirectories():
     with open(os.path.join(secondDirectory, '.sync')) as jsonDataTwo:
         dirTwoJson = json.load(jsonDataTwo)
 
-
     for file in dirOneJson:
         fullName = os.path.join(firstDirectory, file)
         if file not in dirTwoJson:
             shutil.copy(fullName, secondDirectory)
             updateSyncFile(secondDirectory)
         else:
+            fileOne = dirOneJson[file][0]
+            fileTwo = dirTwoJson[file][0]
         #file exists in d2, check date, if diff the, then hash. if diff and date
-            dirOneDigest = dirOneJson[file][1]
-            dirTwoDigest = dirTwoJson[file][1]
+            dirOneDigest = fileOne[1]
+            dirTwoDigest = fileTwo[1]
+            #Digests are same, date is diff
             if dirOneDigest == dirTwoDigest:
-                dirTwoDate = dirTwoJson[file][0]
-                dirOneDate = dirOneJson[file][0]
-                getMostRecentDate(dirOneDate,dirTwoDate)
+
+                if fileOne[0] != fileTwo[0]:
+                    mostRecentIsOne = getMostRecentDate(fileOne,fileTwo)
+                    if(mostRecentIsOne
+                        ):
+                        addUpdatedDate(secondDirectory, file,dirTwoDigest,fileOne[0])
+                    else:
+                        addUpdatedDate(firstDirectory, file,dirOneDigest,fileTwo[0])
+            else:
+                #Files are different, if dates are different get the most recent one and replace the other file
+                print("digest diff, if dates are diff get most up to date one")
+                mostRecentIsOne = getMostRecentDate(fileOne,fileTwo)
+                if(mostRecentIsOne):
+                    copyFileInfo(file,secondDirectory,firstDirectory)
+                    updateSyncFile(firstDirectory)
+                    #the first file is newest, so replace the contents of file two with file one
+                else:
+                        copyFileInfo(file,firstDirectory,secondDirectory)
+                        updateSyncFile(secondDirectory)
+
+                    #diff digest, same date
 
     for file in dirTwoJson:
         fullName = os.path.join(secondDirectory, file)
@@ -130,11 +151,43 @@ def compareDirectories():
             shutil.copy(fullName, firstDirectory)
             updateSyncFile(firstDirectory)
 
-def addMissingFilesFromDirectory(directoryOne,directoryTwo):
-    pass
+
+def copyFileInfo(inputFile,inputDirectory,outputDirectory):
+    readFromFile = os.path.join(inputDirectory, inputFile)
+    addInfoFile = os.path.join(outputDirectory, inputFile)
+    print(readFromFile)
+    print(addInfoFile)
+    if (os.path.isfile(readFromFile)):
+        if(os.path.isfile(addInfoFile)):
+            with open(readFromFile, 'rb') as fsrc:
+                with open(addInfoFile, 'wb') as fdest:
+                    shutil.copyfileobj(fsrc, fdest, 1000)
+
+
+
+
+def addUpdatedDate(inputDirectory,inputFile,digest,newDate):
+    print("Dates are different but digest same, updating date to earliest")
+
+    with open(os.path.join(inputDirectory, '.sync')) as jsonData:
+        jsonDict = json.load(jsonData)
+
+    newDict = defaultdict(str,jsonDict)
+
+    newDict[inputFile].insert(0, (newDate, digest))
+
+    with open((os.path.join(inputDirectory, '.sync')), 'w') as outfile:
+        json.dump(newDict, outfile,indent=4)
 
 def getMostRecentDate(fileOne, fileTwo):
-    pass
+    fileOneTime = datetime.strptime(fileOne[0], "%Y-%m-%d %H:%M:%S %z")
+    fileTwoTime = datetime.strptime(fileTwo[0], "%Y-%m-%d %H:%M:%S %z")
+    #return true if file one is the earliest
+    if fileOneTime < fileTwoTime:
+        return True
+    else:
+        #return false if false two is earliest
+        return False
 
 def updateToLatest(dirOneFile,dirTwoFile):
     pass
@@ -144,6 +197,6 @@ if __name__ == "__main__":
     checkInputDirectories()
     createSyncFile(firstDirectory)
     createSyncFile(secondDirectory)
-    #updateSyncFile(firstDirectory)
+    updateSyncFile(firstDirectory)
     compareDirectories()
 
