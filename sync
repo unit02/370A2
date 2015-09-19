@@ -40,7 +40,7 @@ def copyFilesInDirectory(inputDirectory,outputDirectory):
     print("Copying files...")
     fileList = os.listdir(inputDirectory)
     for file in fileList:
-        if not file.startswith('.'):
+        if not file.startswith('.') and not file.endswith('~'):
             fullName = os.path.join(inputDirectory, file)
             if (os.path.isfile(fullName)):
                 shutil.copy(fullName, outputDirectory)
@@ -61,7 +61,7 @@ def createSyncFile(inputDirectory):
     fileList = os.listdir(inputDirectory)
     with open((os.path.join(inputDirectory, '.sync')), 'w') as outfile:
         for file in fileList:
-            if not file.startswith('.'):
+            if not file.startswith('.') and not file.endswith('~') :
                 fullName = os.path.join(inputDirectory, file)
                 if (os.path.isfile(fullName)):
                     digest = encodeFile(fullName)
@@ -75,7 +75,7 @@ def updateSyncFile(inputDirectory):
     with open(os.path.join(inputDirectory, '.sync')) as json_data:
         jsonDict = json.load(json_data)
 
-    newdict = defaultdict(str,jsonDict)
+    newDict = defaultdict(str,jsonDict)
 
     for file in jsonDict:
         fullName = os.path.join(inputDirectory, file)
@@ -83,11 +83,17 @@ def updateSyncFile(inputDirectory):
         newDigest = encodeFile(fullName)
 
         if not newDigest == jsonDict[file][0][1]:
-            newdict[file].append((time.strftime("%Y-%m-%d %H:%M:%S %z"), newDigest))
+            #newDict[file] = newDict[file][::-1]
+            newDict[file].insert(0, (time.strftime("%Y-%m-%d %H:%M:%S %z"), newDigest))
+
+            #newDict[file].append((time.strftime("%Y-%m-%d %H:%M:%S %z"), newDigest))
+
+            #newDict[file] = newDict[file][::-1]
+
+
 
     with open((os.path.join(inputDirectory, '.sync')), 'w') as outfile:
-        json.dump(newdict, outfile,indent=4)
-            #jsonDict[file.title()] = [time.strftime("%Y-%m-%d %H:%M:%S %z"), digest]
+        json.dump(newDict, outfile,indent=4)
 
 
 def compareFile(dirOneFile,dirTwoFile):
@@ -99,7 +105,7 @@ def updateToLatest(dirOneFile,dirTwoFile):
 
 if __name__ == "__main__":
     checkInputDirectories()
-    #createSyncFile(firstDirectory)
+    createSyncFile(firstDirectory)
     #createSyncFile(secondDirectory)
     updateSyncFile(secondDirectory)
 
