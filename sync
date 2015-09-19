@@ -114,9 +114,11 @@ def compareDirectories():
             shutil.copy(fullName, secondDirectory)
             updateSyncFile(secondDirectory)
 
-
-def compareHashCodes():
-    pass
+    for file in dirTwoJson:
+        fullName = os.path.join(secondDirectory, file)
+        if file not in dirOneJson:
+            shutil.copy(fullName, firstDirectory)
+            updateSyncFile(firstDirectory)
 
 
 def addMissingFilesFromDirectory(directoryOne,directoryTwo):
