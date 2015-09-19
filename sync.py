@@ -98,6 +98,7 @@ def updateSyncFile(inputDirectory):
         json.dump(newDict, outfile,indent=4)
 
 
+
 def compareDirectories():
     updateSyncFile(firstDirectory)
     updateSyncFile(secondDirectory)
@@ -108,20 +109,20 @@ def compareDirectories():
     with open(os.path.join(secondDirectory, '.sync')) as jsonDataTwo:
         dirTwoJson = json.load(jsonDataTwo)
 
+
     for file in dirOneJson:
         fullName = os.path.join(firstDirectory, file)
         if file not in dirTwoJson:
             shutil.copy(fullName, secondDirectory)
             updateSyncFile(secondDirectory)
         else:
+        #file exists in d2, check date, if diff the, then hash. if diff and date
             dirOneDigest = dirOneJson[file][1]
             dirTwoDigest = dirTwoJson[file][1]
             if dirOneDigest == dirTwoDigest:
-                dirTwoJson[file]
-
-        #file exists in d2, check date, if diff the, then hash. if diff and date
-
-
+                dirTwoDate = dirTwoJson[file][0]
+                dirOneDate = dirOneJson[file][0]
+                getMostRecentDate(dirOneDate,dirTwoDate)
 
     for file in dirTwoJson:
         fullName = os.path.join(secondDirectory, file)
@@ -130,6 +131,9 @@ def compareDirectories():
             updateSyncFile(firstDirectory)
 
 def addMissingFilesFromDirectory(directoryOne,directoryTwo):
+    pass
+
+def getMostRecentDate(fileOne, fileTwo):
     pass
 
 def updateToLatest(dirOneFile,dirTwoFile):
