@@ -45,8 +45,6 @@ def copyFilesInDirectory(inputDirectory,outputDirectory):
             if (os.path.isfile(fullName)):
                 shutil.copy(fullName, outputDirectory)
 
-def compareDirectoryFiles(directoryOne,directoryTwo):
-    pass
 
 def encodeFile(fileToEncode):
     h = hashlib.sha256()
@@ -72,8 +70,8 @@ def createSyncFile(inputDirectory):
 def updateSyncFile(inputDirectory):
     #load in json file, check if hash is different, check if date different
 
-    with open(os.path.join(inputDirectory, '.sync')) as json_data:
-        jsonDict = json.load(json_data)
+    with open(os.path.join(inputDirectory, '.sync')) as jsonData:
+        jsonDict = json.load(jsonData)
 
     newDict = defaultdict(str,jsonDict)
 
@@ -83,20 +81,45 @@ def updateSyncFile(inputDirectory):
         newDigest = encodeFile(fullName)
 
         if not newDigest == jsonDict[file][0][1]:
-            #newDict[file] = newDict[file][::-1]
             newDict[file].insert(0, (time.strftime("%Y-%m-%d %H:%M:%S %z"), newDigest))
 
-            #newDict[file].append((time.strftime("%Y-%m-%d %H:%M:%S %z"), newDigest))
-
-            #newDict[file] = newDict[file][::-1]
-
-
+    #add in any files not already in file
+    fileList = os.listdir(inputDirectory)
+    for file in fileList:
+        if not file.startswith('.') and not file.endswith('~') :
+            fullName = os.path.join(inputDirectory, file)
+            if (os.path.isfile(fullName)):
+                digest = encodeFile(fullName)
+                if file not in newDict:
+                    newDict[file] = []
+                    newDict[file].append((time.strftime("%Y-%m-%d %H:%M:%S %z"), digest))
 
     with open((os.path.join(inputDirectory, '.sync')), 'w') as outfile:
         json.dump(newDict, outfile,indent=4)
 
 
-def compareFile(dirOneFile,dirTwoFile):
+def compareDirectories():
+    updateSyncFile(firstDirectory)
+    updateSyncFile(secondDirectory)
+
+    with open(os.path.join(firstDirectory, '.sync')) as jsonData:
+        dirOneJson = json.load(jsonData)
+
+    with open(os.path.join(secondDirectory, '.sync')) as jsonDataTwo:
+        dirTwoJson = json.load(jsonDataTwo)
+
+    for file in dirOneJson:
+        fullName = os.path.join(firstDirectory, file)
+        if file not in dirTwoJson:
+            shutil.copy(fullName, secondDirectory)
+            updateSyncFile(secondDirectory)
+
+
+def compareHashCodes():
+    pass
+
+
+def addMissingFilesFromDirectory(directoryOne,directoryTwo):
     pass
 
 def updateToLatest(dirOneFile,dirTwoFile):
@@ -106,6 +129,7 @@ def updateToLatest(dirOneFile,dirTwoFile):
 if __name__ == "__main__":
     checkInputDirectories()
     createSyncFile(firstDirectory)
-    #createSyncFile(secondDirectory)
-    updateSyncFile(secondDirectory)
+    createSyncFile(secondDirectory)
+    #updateSyncFile(firstDirectory)
+    compareDirectories()
 
