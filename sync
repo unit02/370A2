@@ -220,9 +220,8 @@ def getMostRecentDate(fileOne, fileTwo):
         #return false if false two is earliest
         return False
 
-if __name__ == "__main__":
-
-    if(checkInputDirectories()):
+def runSync():
+     if(checkInputDirectories()):
         syncFile = os.path.join(firstDirectory, '.sync')
         if not(os.path.isfile(syncFile)):
             createSyncFile(firstDirectory)
@@ -232,5 +231,10 @@ if __name__ == "__main__":
         updateSyncFile(firstDirectory)
         updateSyncFile(secondDirectory)
         compDir()
+
+if __name__ == "__main__":
+    runSync()
+
+
 
 
