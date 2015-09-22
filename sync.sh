@@ -1,3 +1,3 @@
 cp sync.py sync
 chmod +x sync
-./sync d1 d3
+./sync dir1 dir2
