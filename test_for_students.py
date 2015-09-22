@@ -200,4 +200,3 @@ surround_test("""9. This starts by showing the initial synchronized directories.
 surround_test("""8. This should show the two directories.
    Then they should only contain c.txt.
    Then they should have a new version of b.txt:""", p8)
-#test_sync()
